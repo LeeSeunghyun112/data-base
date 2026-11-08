@@ -6,6 +6,8 @@
 
 ## 학습 기록 바로가기
 
+- [스택과 큐](#note-stack-queue)
+
 - [10.15](#note-10-15)
 - [10.08](#note-10-08)
 - [10.01 (4주차)](#note-10-01)
@@ -15,6 +17,706 @@
 
 ---
 
+<a id="note-stack-queue"></a>
+
+## 스택과 큐 | 수업 기록
+
+실습 파일: `stack_test.py`, `test_queue.py`
+
+※ 수업 날짜는 파일에서 확인할 수 없어 따로 기입하지 않았다.
+
+### 01 | 스택과 큐의 기본 개념
+
+스택(Stack)과 큐(Queue)는 데이터를 저장하고 꺼내는 순서가 정해진 선형 자료구조이다.
+
+| 구분 | 스택(Stack) | 큐(Queue) |
+|---|---|---|
+| 처리 순서 | 후입선출(LIFO) | 선입선출(FIFO) |
+| 의미 | 마지막에 넣은 데이터를 먼저 꺼냄 | 먼저 넣은 데이터를 먼저 꺼냄 |
+| 삽입 연산 | `push(data)` | `enqueue(data)` |
+| 삭제 연산 | `pop()` | `dequeue()` |
+| 조회 함수 | `peek()` | 실습 파일에서는 `peak()` |
+| 위치 관리 | `top` | `front`, `rear` |
+| 예시 | 쌓아 둔 접시, 실행 취소 | 대기 줄, 인쇄 작업 대기열 |
+
+> **핵심:** 스택은 넣은 순서의 반대로, 큐는 넣은 순서대로 데이터를 꺼낸다.
+
+---
+
+### 02 | 스택 초기화
+
+```python
+def init_stack(size) :
+    global stack, top
+    stack = [None] * size
+    top = -1
+    return print("스택 초기화 완료! 스택의 크기: " + str(size))
+```
+
+#### 코드 이해하기
+
+- `stack = [None] * size`: 지정한 크기만큼 빈 공간을 만든다.
+- `top = -1`: 아직 데이터가 없는 상태를 나타낸다.
+- `top`은 마지막에 저장한 데이터의 인덱스이다.
+- `global stack, top`: 함수 밖에서도 사용하는 변수를 변경한다.
+
+#### 실습 예제
+
+```python
+init_stack(7)
+```
+```text
+스택 초기화 완료! 스택의 크기: 7
+```
+
+> **핵심:** 크기가 7이면 인덱스는 0~6이고, 빈 스택의 `top`은 -1이다.
+
+---
+
+### 03 | 스택에 데이터 넣기: push()
+
+```python
+def push(data) :
+    global top
+    if is_stack_full() :
+        return print("스택이 가득 찼습니다!")
+    else :
+        top += 1
+        stack[top] = data
+        return print("현재 top: " + str(top))
+```
+
+#### 처리 순서
+
+1. `is_stack_full()`로 가득 찼는지 확인한다.
+2. 가득 찼다면 안내 문구를 출력하고 종료한다.
+3. `top += 1`로 저장 위치를 한 칸 올린다.
+4. `stack[top] = data`로 데이터를 저장한다.
+
+#### 실습 흐름
+
+| 호출 | 저장 위치 | 호출 후 top |
+|---|---|---|
+| `push("커피")` | `stack[0]` | 0 |
+| `push("녹차")` | `stack[1]` | 1 |
+| `push("꿀물")` | `stack[2]` | 2 |
+
+> **시험 체크:** 데이터를 넣을 때는 `top`을 먼저 증가시키고 저장한다.
+
+---
+
+### 04 | 스택에서 데이터 꺼내기: pop()
+
+```python
+def pop() :
+    global top
+    if is_stack_empty() :
+        return print("스택이 비어있습니다! 삭제할 데이터가 없습니다.")
+    else :
+        data = stack[top]
+        stack[top] = None
+        top -= 1
+        return print("Pop된 데이터 : " + str(data) + ", 현재 top: " + str(top))
+```
+
+#### 코드 이해하기
+
+```python
+data = stack[top]
+stack[top] = None
+top -= 1
+```
+
+1. 마지막 데이터를 `data`에 보관한다.
+2. 해당 칸을 `None`으로 비운다.
+3. `top`을 한 칸 내린다.
+
+#### 출력 예시
+
+7개의 음료를 모두 넣은 상태에서 첫 `pop()`을 실행하면 다음과 같다.
+
+```text
+Pop된 데이터 : 아이스티, 현재 top: 5
+```
+
+> **핵심:** 마지막에 들어간 `아이스티`가 가장 먼저 나온다.
+
+#### 반환값 확인
+
+이 실습의 `pop()`은 `return data`가 아니라 `return print(...)`를 사용한다. 따라서 데이터와 top은 화면에 출력되지만, 함수 호출의 반환값은 `None`이다. 데이터를 변수에 받아 쓰려면 함수에서 `return data`를 하도록 별도로 변경해야 한다.
+
+---
+
+### 05 | 스택의 맨 위 데이터 확인: peek()
+
+```python
+def peek() :
+    global top
+    if is_stack_empty() :
+        return print("스택이 비어있습니다! Peek 불가!")
+    else:
+        data = stack[top]
+        return print("Peek 데이터 : " + str(data) + ", 현재 top: " + str(top))
+```
+
+#### pop()과 비교
+
+| 구분 | `pop()` | `peek()` |
+|---|---|---|
+| 데이터 확인 | 가능 | 가능 |
+| 저장된 데이터 제거 | 제거함 | 제거하지 않음 |
+| top 변경 | 1 감소 | 변경 없음 |
+| 이 실습의 반환값 | `None` | `None` |
+
+실습에서는 `peek()`도 `return print(...)`를 사용하므로 화면 출력만 하고 값을 반환하지 않는다.
+
+> **핵심:** `peek()`는 마지막 데이터를 확인만 하고 스택 상태를 유지한다.
+
+---
+
+### 06 | 스택의 포화 상태와 공백 상태
+
+```python
+def is_stack_full() :
+    global SIZE, stack, top
+    if top == len(stack) - 1 :
+        return True
+    else : 
+        return False
+```
+
+```python
+def is_stack_empty() :
+    global top
+    if top == -1 :
+        return True
+    else :
+        return False
+```
+
+| 상태 | 조건 | 크기 7일 때 |
+|---|---|---|
+| 가득 참 | `top == len(stack) - 1` | `top == 6` |
+| 비어 있음 | `top == -1` | `top == -1` |
+
+데이터가 가득 찼는데 추가하려 하면 오버플로(overflow), 비었는데 꺼내려 하면 언더플로(underflow) 상황이다. 실습 함수는 먼저 상태를 확인해 잘못된 접근을 막는다.
+
+#### 확인할 점
+
+`is_stack_full()`에 `global SIZE`가 있지만, 실제 크기 판단에는 `SIZE`가 아닌 `len(stack)`을 사용한다. `global` 선언 자체가 SIZE에 값을 저장하거나 변수를 생성하는 것은 아니다.
+
+---
+
+### 07 | 스택 전체 상태 출력
+
+```python
+def print_stack() :
+    print("=== 스택 상태 ===")
+    for i in range(len(stack) - 1, -1, -1) :
+        print(stack[i])
+    print("================")
+```
+
+#### 코드 이해하기
+
+`range(len(stack) - 1, -1, -1)`은 마지막 인덱스부터 0까지 역순으로 이동한다. 크기가 7이면 6, 5, 4, 3, 2, 1, 0 순서이다.
+
+이 함수는 유효 데이터만이 아니라 스택의 모든 칸을 출력한다. 따라서 비어 있는 칸의 `None`도 표시된다.
+
+---
+
+### 08 | 스택 실습의 실행 순서와 결과
+
+실제 파일은 다음 순서로 실행된다.
+
+1. 크기가 7인 스택을 초기화한다.
+2. 커피, 녹차, 꿀물, 레몬차, 오렌지주스, 밀크티, 아이스티를 넣는다.
+3. 콜라를 추가하려 하지만 이미 가득 차 있어 저장하지 못한다.
+4. 스택 상태와 맨 위 데이터를 출력한다.
+5. `pop()`을 7번 실행해 모든 데이터를 꺼낸다.
+6. 추가 `pop()`과 `peek()`은 빈 스택 안내를 출력한다.
+7. 마지막으로 빈 스택 전체를 출력한다.
+
+#### 실제 출력 결과
+
+```text
+스택 초기화 완료! 스택의 크기: 7
+현재 top: 0
+현재 top: 1
+현재 top: 2
+현재 top: 3
+현재 top: 4
+현재 top: 5
+현재 top: 6
+스택이 가득 찼습니다!
+=== 스택 상태 ===
+아이스티
+밀크티
+오렌지주스
+레몬차
+꿀물
+녹차
+커피
+================
+Peek 데이터 : 아이스티, 현재 top: 6
+Pop된 데이터 : 아이스티, 현재 top: 5
+Pop된 데이터 : 밀크티, 현재 top: 4
+Pop된 데이터 : 오렌지주스, 현재 top: 3
+Pop된 데이터 : 레몬차, 현재 top: 2
+Pop된 데이터 : 꿀물, 현재 top: 1
+Pop된 데이터 : 녹차, 현재 top: 0
+Pop된 데이터 : 커피, 현재 top: -1
+스택이 비어있습니다! 삭제할 데이터가 없습니다.
+스택이 비어있습니다! Peek 불가!
+=== 스택 상태 ===
+None
+None
+None
+None
+None
+None
+None
+================
+```
+
+---
+
+### 09 | 큐 초기화
+
+```python
+def init_queue(size) :
+    global print_q, front, rear
+    print_q = [None] * size
+    front = -1
+    rear = -1
+    return print("큐 초기화 완료! 큐의 크기: " + str(size))
+```
+
+#### 변수 역할
+
+| 변수 | 역할 |
+|---|---|
+| `print_q` | 큐의 데이터를 저장하는 리스트 |
+| `front` | 마지막으로 데이터를 꺼낸 위치 |
+| `rear` | 마지막으로 데이터를 넣은 위치 |
+
+초기값은 `front = -1`, `rear = -1`이다. 다음에 꺼낼 데이터는 `print_q[front + 1]`에 있다.
+
+> **핵심:** 이 구현에서 front는 첫 데이터 자체가 아니라 그 바로 앞, 즉 마지막으로 삭제한 위치를 나타낸다.
+
+---
+
+### 10 | 큐에 데이터 넣기: enqueue()
+
+```python
+def enqueue(data) :
+    global rear
+    if is_queue_full() :
+        return print("큐가 가득 찼습니다.")
+    else :
+        rear += 1
+        print_q[rear] = data
+        return print("현재 rear: " + str(rear))
+```
+
+#### 처리 순서
+
+1. 큐의 뒤쪽에 저장할 공간이 있는지 확인한다.
+2. `rear += 1`로 삽입 위치를 이동한다.
+3. `print_q[rear] = data`로 데이터를 넣는다.
+
+커피와 우유를 순서대로 넣으면 `print_q[0]`은 커피, `print_q[1]`은 우유가 된다. 이때 `front`는 -1, `rear`는 1이다.
+
+#### 반환값
+
+`enqueue()`도 `return print(...)`를 사용하므로 반환값은 `None`이다.
+
+---
+
+### 11 | 큐에서 데이터 꺼내기: dequeue()
+
+```python
+def dequeue() :
+    global front, temp
+    if is_queue_empty() :
+        return print("큐가 비어있습니다.! 삭제할 데이터가 없습니다.")
+    front += 1
+    temp = print_q[front]
+    print_q[front] = None
+    return temp
+```
+
+#### 코드 이해하기
+
+```python
+front += 1
+temp = print_q[front]
+print_q[front] = None
+return temp
+```
+
+- `front += 1`: 다음에 꺼낼 데이터 위치로 이동한다.
+- `temp = print_q[front]`: 꺼낼 값을 보관한다.
+- `print_q[front] = None`: 해당 칸을 비운다.
+- `return temp`: 꺼낸 데이터를 호출한 곳으로 반환한다.
+
+#### 추가 확인 예제
+
+아래 코드는 원본의 실행 부분에는 없으며, 함수를 이해하기 위한 예제이다. 기존 큐에 커피, 우유, 주스, 물, 콜라가 들어 있는 상태를 기준으로 한다.
+
+```python
+print(dequeue())
+print(dequeue())
+```
+```text
+커피
+우유
+```
+
+> **핵심:** 먼저 넣은 커피가 먼저 나온다. 두 번 꺼내면 `front`는 1이 되고, `rear`는 4로 유지된다.
+
+---
+
+### 12 | 큐의 다음 데이터 확인: peak()
+
+```python
+def peak() :
+    global front
+    if is_queue_empty() :
+        return print("큐가 비어있습니다! peak 불가!")
+    else :
+        data = print_q[front+1]
+        return data
+```
+
+#### 코드 이해하기
+
+`print_q[front + 1]`은 다음에 꺼낼 데이터이다. 데이터나 인덱스를 변경하지 않고 그 값을 반환한다.
+
+#### 함수 이름 확인
+
+조회 연산은 보통 `peek`라고 쓰지만, 첨부 파일의 함수명은 `peak()`이다. 이 실습 코드를 실행할 때도 정의된 이름인 `peak()`를 사용해야 한다.
+
+| 구분 | `dequeue()` | `peak()` |
+|---|---|---|
+| 데이터 제거 | 제거함 | 제거하지 않음 |
+| front 변경 | 1 증가 | 변경 없음 |
+| 정상 실행 시 반환값 | 꺼낸 데이터 | 다음에 꺼낼 데이터 |
+
+#### 출력 예제
+
+```python
+print(peak())
+```
+```text
+커피
+```
+
+---
+
+### 13 | 큐의 공백·포화 상태와 구현의 한계
+
+```python
+def is_queue_empty() :
+    global front, rear
+    if front == rear :
+        return True
+    else :
+        return False
+```
+
+```python
+def is_queue_full() :
+    global front, rear
+    if rear == len(print_q) - 1 :
+        return True
+    else :
+        return False
+```
+
+| 상태 | 조건 |
+|---|---|
+| 비어 있음 | `front == rear` |
+| 뒤쪽 저장 공간을 다 사용함 | `rear == len(print_q) - 1` |
+| 현재 데이터 개수 | `rear - front` |
+
+#### 확인할 점: 앞쪽 빈칸은 재사용하지 않는다
+
+이 실습은 인덱스가 앞으로만 이동하는 단순한 선형 큐이다. `dequeue()`로 앞쪽 데이터를 지워도 `rear`는 뒤로 돌아오지 않는다.
+
+예를 들어 크기 5인 큐를 모두 채우면 `rear`는 4이다. 커피를 꺼내 `print_q[0]`이 비어도 `rear == 4`이므로 새로운 데이터를 넣지 못한다. 모든 데이터를 꺼낸 뒤에는 `front == rear == 4`여서 공백 검사와 포화 검사가 모두 참이 될 수도 있다.
+
+이는 원형 큐가 아니기 때문에 생기는 구현상의 한계이다. 빈 공간을 재사용하려면 데이터 이동이나 원형 큐 등의 방식이 필요하다.
+
+---
+
+### 14 | 큐 상태 출력과 실제 실행 결과
+
+```python
+def print_queue() :
+    print("=== 큐 상태 ===")
+    for i in range(len(print_q)) :
+        print(print_q[i])
+    print("현재 front: " + str(front))
+    print("현재 rear: " + str(rear))
+    print("===============")
+```
+
+원본 파일은 크기 5인 큐에 커피, 우유, 주스, 물, 콜라를 넣은 뒤 `peak()`의 반환값을 출력하고 큐 전체 상태를 확인한다. 실행 부분에는 `dequeue()` 호출이 없다.
+
+#### 실제 출력 결과
+
+```text
+큐 초기화 완료! 큐의 크기: 5
+현재 rear: 0
+현재 rear: 1
+현재 rear: 2
+현재 rear: 3
+현재 rear: 4
+===========peak() 함수 호출 전=============
+커피
+===========peak() 함수 호출 후=============
+=== 큐 상태 ===
+커피
+우유
+주스
+물
+콜라
+현재 front: -1
+현재 rear: 4
+===============
+```
+
+> **핵심:** `peak()` 전후에 큐의 내용은 같으며, `front = -1`, `rear = 4`로 유지된다.
+
+---
+
+### 15 | 스택과 큐의 처리 과정 비교
+
+커피, 녹차, 꿀물을 차례대로 넣었다고 가정한다.
+
+| 처리 | 스택 | 큐 |
+|---|---|---|
+| 첫 삽입 | 커피 | 커피 |
+| 두 번째 삽입 | 녹차 | 녹차 |
+| 세 번째 삽입 | 꿀물 | 꿀물 |
+| 첫 삭제 | 꿀물 | 커피 |
+| 두 번째 삭제 | 녹차 | 녹차 |
+| 세 번째 삭제 | 커피 | 꿀물 |
+
+#### 실습 구현의 연산 비용
+
+별도의 데이터 이동 없이 인덱스와 한 칸의 값만 변경하는 삽입·삭제·조회·상태 검사는 `O(1)`이다. `print_stack()`과 `print_queue()`는 리스트 전체 칸을 순회하므로 리스트 크기를 n이라 할 때 `O(n)`이다.
+
+#### 출력과 반환의 차이
+
+| 함수 | 정상 처리 시 화면 출력 | 정상 처리 시 반환값 |
+|---|---|---|
+| 스택 `push()` | 현재 top | `None` |
+| 스택 `pop()` | 꺼낸 데이터와 top | `None` |
+| 스택 `peek()` | 조회 데이터와 top | `None` |
+| 큐 `enqueue()` | 현재 rear | `None` |
+| 큐 `dequeue()` | 직접 출력하지 않음 | 꺼낸 데이터 |
+| 큐 `peak()` | 직접 출력하지 않음 | 조회한 데이터 |
+
+`print()`는 화면에 표시하는 함수이고, `return`은 호출한 곳으로 값을 돌려주는 문장이다. 두 동작을 구분해야 한다.
+
+---
+
+### 16 | 시험 대비 체크
+
+1. **스택의 처리 순서:** 후입선출(LIFO)
+2. **큐의 처리 순서:** 선입선출(FIFO)
+3. **스택의 초기 top:** `-1`
+4. **스택 삽입:** `top += 1` → `stack[top] = data`
+5. **스택 삭제:** 데이터 보관 → 칸 비우기 → `top -= 1`
+6. **스택 공백:** `top == -1`
+7. **스택 포화:** `top == len(stack) - 1`
+8. **큐 초기값:** `front = rear = -1`
+9. **큐 삽입:** `rear += 1` → `print_q[rear] = data`
+10. **큐 삭제:** `front += 1` → 값 보관 → 칸 비우기 → 값 반환
+11. **큐 조회 위치:** `print_q[front + 1]`
+12. **큐 공백:** `front == rear`
+13. **선형 큐 포화:** `rear == len(print_q) - 1`
+14. **조회와 삭제의 차이:** 조회는 데이터와 인덱스를 변경하지 않는다.
+15. **실습 함수명:** 스택은 `peek()`, 큐는 `peak()`이다.
+16. **이 실습의 pop():** 꺼낸 값을 출력하지만 반환하지는 않는다.
+
+> **가장 중요한 내용:** 스택은 `top`에서 넣고 꺼내며, 큐는 `rear`로 넣고 `front`를 증가시켜 꺼낸다.
+
+---
+
+### 17 | 전체 실습 코드: stack_test.py
+
+```python
+# Stack 초기화 함수
+def init_stack(size) :
+    global stack, top
+    stack = [None] * size
+    top = -1
+    return print("스택 초기화 완료! 스택의 크기: " + str(size))
+
+#  Push 함수
+def push(data) :
+    global top
+    if is_stack_full() :
+        return print("스택이 가득 찼습니다!")
+    else :
+        top += 1
+        stack[top] = data
+        return print("현재 top: " + str(top))
+
+# Pop 함수
+def pop() :
+    global top
+    if is_stack_empty() :
+        return print("스택이 비어있습니다! 삭제할 데이터가 없습니다.")
+    else :
+        data = stack[top]
+        stack[top] = None
+        top -= 1
+        return print("Pop된 데이터 : " + str(data) + ", 현재 top: " + str(top))
+
+def peek() :
+    global top
+    if is_stack_empty() :
+        return print("스택이 비어있습니다! Peek 불가!")
+    else:
+        data = stack[top]
+        return print("Peek 데이터 : " + str(data) + ", 현재 top: " + str(top))
+
+# Stack Full Check
+def is_stack_full() :
+    global SIZE, stack, top
+    if top == len(stack) - 1 :
+        return True
+    else : 
+        return False
+    
+# Stack Empty Check
+def is_stack_empty() :
+    global top
+    if top == -1 :
+        return True
+    else :
+        return False
+
+# 스택 상태 출력 (프린트 함수)
+def print_stack() :
+    print("=== 스택 상태 ===")
+    for i in range(len(stack) - 1, -1, -1) :
+        print(stack[i])
+    print("================")
+
+    
+# stack 초기화
+init_stack(7)
+
+# Push
+push("커피")
+push("녹차")
+push("꿀물")
+push("레몬차")
+push("오렌지주스")
+push("밀크티")
+push("아이스티")
+
+push("콜라")
+
+print_stack()
+
+peek()
+# Pop
+pop()
+pop()
+pop()
+pop()
+pop()
+pop()
+pop()
+
+pop()
+
+peek()
+
+print_stack()
+```
+
+---
+
+### 18 | 전체 실습 코드: test_queue.py
+
+```python
+def init_queue(size) :
+    global print_q, front, rear
+    print_q = [None] * size
+    front = -1
+    rear = -1
+    return print("큐 초기화 완료! 큐의 크기: " + str(size)) 
+
+def enqueue(data) :
+    global rear
+    if is_queue_full() :
+        return print("큐가 가득 찼습니다.")
+    else :
+        rear += 1
+        print_q[rear] = data
+        return print("현재 rear: " + str(rear))
+
+def dequeue() :
+    global front, temp
+    if is_queue_empty() :
+        return print("큐가 비어있습니다.! 삭제할 데이터가 없습니다.")
+    front += 1
+    temp = print_q[front]
+    print_q[front] = None
+    return temp
+
+def peak() :
+    global front
+    if is_queue_empty() :
+        return print("큐가 비어있습니다! peak 불가!")
+    else :
+        data = print_q[front+1]
+        return data
+
+def is_queue_empty() :
+    global front, rear
+    if front == rear :
+        return True
+    else :
+        return False
+
+def is_queue_full() :
+    global front, rear
+    if rear == len(print_q) - 1 :
+        return True
+    else :
+        return False
+
+
+def print_queue() :
+    print("=== 큐 상태 ===")
+    for i in range(len(print_q)) :
+        print(print_q[i])
+    print("현재 front: " + str(front))
+    print("현재 rear: " + str(rear))
+    print("===============")
+
+init_queue(5)
+enqueue("커피")
+enqueue("우유")
+enqueue("주스")
+enqueue("물")
+enqueue("콜라")
+print("===========peak() 함수 호출 전=============")
+print(peak())
+print("===========peak() 함수 호출 후=============")
+
+print_queue()
+```
+
+---
 
 
 <a id="note-10-15"></a>
